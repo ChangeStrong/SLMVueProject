@@ -1,4 +1,5 @@
-export default{
+//export default
+var AdminDefined = {
 	user:{headUrl: "https://www.feifeicenter.club/resources/images/defaultAdminHead.png",
 	username: "admin"},
 	homeCurrentTitleIndex:0

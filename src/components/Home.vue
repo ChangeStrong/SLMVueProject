@@ -5,11 +5,11 @@
 			<div class="lg_body_content">
 				<div class="lg_left">
 					<div class="lg_ring">
-						<BannerPhone :bannerData="bannerData" v-if="isMobile" />
-						<BannerPc :bannerData="bannerData" v-if="!isMobile" />
+						<BannerPhone :imgArray='bannerData' />
 					</div>
-					<div class="lg_levels">
-						<div class="lg_s" v-for="item in categoryData" v-if="item.items.length > 0">
+					<div class="lg_levels" id="vue_det">
+									
+						<div class="lg_s" v-for="(item,index) in categoryArray">
 							<div class="lg_nav nav_s">
 								<router-link class='nav_title' :to="{ path: '/CategoryLookMore', query: { type: item.type }}">{{item.title}}</router-link>
 								<div class="nav_s_more">
@@ -17,10 +17,10 @@
 								</div>
 							</div>
 							<div class="lg_content">
-								<ul data-cid="10" data-seq="1">
-									<li v-for="lidata in item.items">
+								<ul data-cid="10" data-seq="1" id="lgcontentUl">
+									<li v-for="(lidata,tnum) in getLeveProducts(item.items)" v-bind:style="getCellStyle(tnum)">
 										<router-link :to="{ path: '/WorkDetail', query: { productId: lidata.id }}">
-											<img width="104" height="137" :src="lidata.thumUrl" />
+										<img :width="levelCellWidth - 2" :height="(levelCellWidth -2)/630*831" :src="lidata.thumUrl" />
 										</router-link>
 										<div class="lg_title">
 											<router-link :to="{ path: '/WorkDetail', query: { productId: lidata.id }}">{{lidata.name}}</router-link>
@@ -29,6 +29,7 @@
 								</ul>
 							</div>
 						</div>
+					
 					</div>
 
 					<div class="lg_a"></div>
@@ -51,7 +52,6 @@
 <script>
 	import Header from './pages/Header.vue'
 	import Footer from './pages/Footer.vue'
-	import BannerPc from './BannerPc.vue'
 	import BannerPhone from './BannerPhone.vue'
 	import HTTPUtil from '../js/HttpUtil.js'
 	import CookieUtil from '../js/CookieUtil.js'
@@ -70,56 +70,77 @@
 		components: {
 			Header,
 			Footer,
-			BannerPc,
 			BannerPhone
 		},
 		data() {
 			return {
 				bannerData: [],
-				categoryData: [],
+				categoryArray: [],
 				adData: [],
-				isMobile:false,
+				levelCellWidth:104,
+				levelCellNum:9,
 			}
 		},
 		methods: {
-			_isMobile() {
-				console.log('测试。。。。')
-				console.log(navigator.userAgent)
-				let flag = navigator.userAgent.match(
-					/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
-				)
-				return flag;
-			},
-			addVistoryUser(){
-							//添加游客
-							var params = new URLSearchParams();
-							params.append(CookieUtil.sessionKey, CookieUtil.getBrowserIdentify());
-							console.log("sessionKey is ");
-							console.log(CookieUtil.getBrowserIdentify());
-							HTTPUtil.post('user/visitor/add.do', params)
-								.then(response => {
-									console.log(response.data);
-									if (response.data.code == 0 || response.data.code == -2) {
-										CookieUtil.set(CookieUtil.sessionKey,CookieUtil.getBrowserIdentify());
-									}
-								})
-								.catch(function(error) {
-									console.log(error);
-								});
-						}
+			updateCellWidth:function() {//更新所有cell宽度
+			//从多少个开始适配
+							let array = this.getCellFineWidth(15)
+							let width = array[0]
+							let num = array[1]
+							
+							this.levelCellWidth = width
+							this.levelCellNum = num
+							
+							// console.log('每行个数:'+num+"cell宽度:"+width)		  
+						  },
+						  getCellFineWidth:function(num) {//获取cell最适合宽度
+						  
+						  				  let allwidth = $("#lgcontentUl").width()
+						  				  // console.log('总宽度:'+allwidth)
+						  				  let padding = 10//间距
+						  				  let cellW = (allwidth - padding * (num - 1))/num
+						  				  if (cellW >= 104) {
+						  					  return [cellW,num]
+						  				  }else {
+						  					  return this.getCellFineWidth(num - 1)
+						  				  }
+						  },
+						  getCellStyle:function(index) {
+							  // console.log("当前cell序号index:"+index);
+						  				  if (index % this.levelCellNum == 0) {//每行 第一个
+						  				    // console.log('这是第一个:index:'+index+'余数:'+(index % this.levelCellNum))
+						  					return {width:this.levelCellWidth+'px'}
+						  				  }else {
+						  					return {width:this.levelCellWidth+'px','margin-left':'10px'}
+						  				  }
+						  },
+						  getLeveProducts:function(items){//切掉不够显示一行的作品
+						  
+							//多了的作品数
+							 let remain = items.length % this.levelCellNum
+							  if (items.length > 2 && items.length > this.levelCellNum && remain <= this.levelCellNum / 2.0) {
+								  let tItems = [].concat(items)
+								  // let tItems = JSON.parse(JSON.stringify(items))
+								  var removeIndex =  items.length - remain
+								  //删除多余作品
+								  tItems.splice(removeIndex)
+								  return tItems
+							  }
+							  return items
+						  }
 		},
 		mounted() {
 			HTTPUtil.get('home/getadAndBanner.do', null)
 				.then(response => {
-					console.log(response.data);
+					console.log('bannerdata:'+ response.data);
 					if (response.data.code == 0) {
 						let data = response.data.data;
 
 						this.bannerData = data.banner.items;
 						this.adData = data.Ad.items;
-						// this.categoryData = data.Category;
+						// this.categoryArray = data.Category;
 						console.log('banner:' + this.bannerData.length);
-						console.log('categoryData:' + JSON.stringify(this.bannerData));
+						console.log('categoryArray:' + JSON.stringify(this.bannerData));
 					}
 				})
 				.catch(function(error) {
@@ -133,52 +154,19 @@
 					console.log(response.data);
 					if (response.data.code == 0) {
 						let data = response.data.data;
-						this.categoryData = data.Category;
-						// console.log('banner:' + this.bannerData.length);
-						// console.log('categoryData:' + JSON.stringify(this.categoryData));
+						this.categoryArray = data.Category;
+						// console.log('categoryArray:' + JSON.stringify(this.categoryArray));
 					}
 				})
 				.catch(function(error) {
 					console.log(error);
 				});
 				
-				//添加游客信息
-				var sessionKey = CookieUtil.get("sessionKey");
-				if(sessionKey == null){
-					//添加游客
-					console.log('需要添加游客');
-									this.addVistoryUser();
-				}else{
-					console.log('sessionKey='+sessionKey);
-					//判断用户是否已经存在了
-										var params = new URLSearchParams();
-										params.append(CookieUtil.sessionKey, sessionKey);
-										HTTPUtil.post('user/getDetail.do', params)
-											.then(response => {
-												console.log(response.data);
-												if (response.data.code != 0) {
-													// CookieUtil.set(CookieUtil.sessionKey,CookieUtil.getBrowserIdentify());
-													//不存在则添加游客
-													this.addVistoryUser();
-												}
-											})
-											.catch(function(error) {
-												console.log(error);
-											});
-				}
-
 				
-				if(this._isMobile()){
-					this.isMobile = true;
-					console.log('是手机')
-				}else {
-					console.log('是PC')
-					this.isMobile = false;
-				}
 		}
 	}
 </script>
 
-<style>
+<style scoped>
 	@import "../css/Home.css";
 </style>

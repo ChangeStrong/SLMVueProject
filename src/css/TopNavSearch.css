@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .tn-body {
 	text-align: center;
 	margin: 0;
@@ -22,57 +23,68 @@
 	}
 	
 	.mod-search-input-wr {
-	    width: 50%;
-	}
-	
-	.tn-input {
-		width: 80%;
+	    max-width: 50%;
 	}
 }
 
-@media (min-width: 650px){/*宽度大于650px*/
+@media (min-width: 753px){/*宽度大于650px*/
 	.tn-input {
-		width: 470px;
+		/* width: 470px; */
 	}
 }
 
-@media (max-width: 650px){/*宽度小于650px*/
-	.tn-title {
+@media (max-width: 753px){/*宽度小于650px*/
+	.tn-title .word_img{
 		display: none;
 	}
 }
 
-
-
 .tn-wrap {
 	margin: 0 auto;
 	height: 85px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
 }
 .tn-title {
-	/* float: left; */
-	position: absolute;
 	height: 85px;
-	line-height: 85px;
-	top: 0;
-	bottom: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 
-.tn-title img {
-	vertical-align: middle;
+.tn-title .icon_img {
+	background: url(../resources/images/show/logo_icon.png) no-repeat;
+	width: 55px;
+	height: 55px;
+	background-size: 55px 55px;
+	margin-left: 5px;
 }
 
 .tn-input {
+	flex-shrink: 2;/*无空间则压缩我的空间*/
+	flex-grow: 2;/*有空间则增加我的空间*/
 	height: 44px;
-	margin: 0 auto;
-	padding-top: 25px;
+	min-width: 215px;
+	max-width: 470px;
 	display: flex;
 	flex-direction: row;
+	justify-content: center;
 }
 .tn-input input {
 	/* width: 376px; */
 	/* height: 20px;
 	line-height: 20px; */
 	
+}
+
+.tn-wrap .user {
+	
+}
+
+.tn-wrap .user button {
+	color: #f8914d;
 }
 
 .mod-search-label {
@@ -95,6 +107,7 @@
     border: 1px solid #dcd8d4;
     border-right: none;
     background-color: #fff;
+    box-sizing: border-box;
 }
 
 
@@ -116,6 +129,7 @@
     font-size: 14px;
 	position: absolute;
 	left: 0;
+	box-sizing: border-box;
 }
 
 .ac_results {
@@ -135,12 +149,13 @@
 	top: 44px;
 	color: black;
 	max-height: 200px;
+	display: none;
 }
 
 .ac_results li {
-    height: 30px;
+  /*   height: 30px;
     line-height: 30px;
-    /* padding: 5px 0 6px 13px; */
+    padding: 5px 0 6px 13px; */
     zoom: 1;
     border-top: 1px solid #f2f2f2;
     position: relative;
@@ -149,7 +164,10 @@
 
 .ac_results li a {
 	color: black;
-	padding: 5px 0 6px 13px;
+	/* padding: 5px 0 6px 13px; */
+	height: 30px;
+    line-height: 30px;
+    padding: 0px 5px;
 }
 
 .mod-search-submit {
@@ -163,18 +181,54 @@
     cursor: pointer;
 }
 
-.dreamChatButton{
-	/* background-repeat: no-repeat; */
+/* .dreamChatButton{
 	border: 0;
-	/* border-radius: 25px 25px 25px 25px; */
-	/* background-image: url(../assets/shenlong.png); */
-	/* width: 42px; */
 	height: 42px;
-	/* background-size: 100% 100%; */
 	margin-left: 50px;
 	
 	color: #f8914d;
 	cursor: pointer;
 	background-color: transparent;
 	font-size: 18px;
+} */
+
+.user .logined {
+	position: relative;
+	margin-right: 29px;
+}
+.user .head_img {
+	border-radius: 20px;
+}
+.showSelectedList {
+	position: absolute;
+	right: -24px;
+	width: 100px;
+	top: 40px;
+	z-index: 10000;
+}
+
+.slcontent {
+	margin-top: 8px;
+	width: 100%;
+	background-color: rgba(0,0,0,0.7);
+	border-radius: 2px;
+}
+
+.showSelectedList ul {
+	padding: 10px 5px;
+}
+
+.showSelectedList ul li {
+	text-align: center;
+	border-bottom: 1px dotted white;
+}
+
+.showSelectedList ul li a {
+	padding: 5px 10px;
+	color: white;
+	display: block;
+}
+
+.showSelectedList ul li a:hover {
+	color: #f8914d;
 }

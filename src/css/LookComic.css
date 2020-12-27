@@ -9,7 +9,7 @@
 	}
 	
 	.top-nav .logo-top {
-		
+		display: flex;
 	}
 }
 
@@ -18,7 +18,7 @@
 		
 	}
 	.top-nav .logo-top {
-		display: none;
+		 display: none; 
 	}
 }
 .lc-main-wrap {
@@ -37,23 +37,45 @@ a {
 	height: 50px;
 	background-color: rgba(0,0,0,0.3);
 	color: white;
-	line-height: 50px;
+	/* line-height: 50px; */
 	font-size: 30px;
+	
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
 }
-.top-nav-left {
-	float: left;
+.top-nav .left {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+.top-nav .left .logo-top {
 	height: 100%;
-	margin-left: 15px;
+	/* display: flex; */
+	flex-direction: column;
+	justify-content: center;
 }
-.top-nav-title {
-	font-size: 30px;
+.top-nav .left .top-nav-title {
+	font-size: 25px;
+	margin-left:5px;
+}
+
+.top-nav .left span {
+	font-size: 25px;
+}
+
+.top-nav .right {
+	color:white;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-right: 5px;
 }
 
 .bottom-nav {
 	position: fixed;
 	bottom: 0;
 	width: 100%;
-	height: 50px;
 	background-color: rgba(0,0,0,0.3);
 	color: white;
 	line-height: 50px;
@@ -64,11 +86,6 @@ a {
 
 .bottom-nav a {
 	font-size: 20px;
-}
-.top-nav .logo-top {
-	position: absolute;
-	left: 10px;
-	top: 10px;
 }
 .bottom-nav .logo-bottom {
 	/* margin-left: 10px; */
@@ -148,11 +165,34 @@ a {
 .hiddenDiv {
 	display: none;
 }
+@media (min-width: 1200px){/*宽度大于1100px*/
+	.work-catalogue-list {
+		min-width: 160px;
+		max-width: 230px;
+	}
+	.work-catalogue-list li {
+		min-height: 30px;
+		border-bottom: 1px dashed rgba(255,255,255,0.5);
+	}
+}
+@media (max-width: 1200px){/*宽度小于1100px*/
+
 .work-catalogue-list {
-	background-color: rgba(0,0,0,0.5);
+		min-width: 240px;
+		max-width: 320px;
+	}
+	
+	.work-catalogue-list li {
+		min-height: 40px;
+		border-bottom: 1px dashed rgba(255,255,255,0.5);
+	}
+}
+
+.work-catalogue-list {
+	background-color: rgba(0,0,0,0.9);
 	border-radius: 20px 0px 0px 20px;
 /* 	border: 1px solid black; */
-	width: 230px;
+	
 	height: 100%;
 	position: fixed;
 	right: 0px;
@@ -165,13 +205,22 @@ a {
 	padding: 10px;
 }
 
+.work-catalogue-list li.more {
+	color: white;
+	cursor: pointer;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
 .work-catalogue-list li {
-	padding-top: 5px;
-	padding-bottom: 5px;
+
 	text-align: -webkit-left;
 	text-align: -moz-left;
 	list-style: none;
-	
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 
 .work-catalogue-list li a {
@@ -179,6 +228,7 @@ a {
 	text-decoration: none;
 	color: #b0b0b0;
 	font-size: 13px;
+	width: 100%;
 }
 .work-catalogue-list li .active {
 	color: #e66201;
