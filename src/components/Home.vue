@@ -8,7 +8,7 @@
 						<BannerPhone :imgArray='bannerData' />
 					</div>
 					<div class="lg_levels" id="vue_det">
-									
+
 						<div class="lg_s" v-for="(item,index) in categoryArray">
 							<div class="lg_nav nav_s">
 								<router-link class='nav_title' :to="{ path: '/CategoryLookMore', query: { type: item.type }}">{{item.title}}</router-link>
@@ -17,33 +17,27 @@
 								</div>
 							</div>
 							<div class="lg_content">
-								<ul data-cid="10" data-seq="1" id="lgcontentUl">
+								<ul id="levelContainer" ref="lgcontentUlRef">
 									<li v-for="(lidata,tnum) in getLeveProducts(item.items)" v-bind:style="getCellStyle(tnum)">
 										<router-link :to="{ path: '/WorkDetail', query: { productId: lidata.id }}">
-										<img :width="levelCellWidth - 2" :height="(levelCellWidth -2)/630*831" :src="lidata.thumUrl" />
+											<img :width="levelCellWidth - 2" :height="(levelCellWidth -2)/630*831" :src="lidata.thumUrl" />
 										</router-link>
 										<div class="lg_title">
-											<router-link :to="{ path: '/WorkDetail', query: { productId: lidata.id }}">{{lidata.name}}</router-link>
+											<router-link :to="{ path: '/WorkDetail', query: { productId: lidata.id }}">
+												{{lidata.name}}
+											</router-link>
 										</div>
 									</li>
 								</ul>
 							</div>
 						</div>
-					
-					</div>
 
+					</div>
 					<div class="lg_a"></div>
 				</div>
-				<div class="lg_shop_nav"></div>
-				<div class="lg_shop">
-					<ul>
-						<li v-for="(value,index) in adData" class="lg-shop-li" v-bind:style="{ marginRight: index==(adData.length-1)?'0':'27px'}">
-							<img width="126px" height="80px" :src="value.thumUrl" />
-						</li>
-						<div class="clear_float"></div>
-					</ul>
-				</div>
+				<HomeAd :adList='adList'></HomeAd>
 			</div>
+
 		</div>
 		<Footer />
 	</div>
@@ -52,9 +46,11 @@
 <script>
 	import Header from './pages/Header.vue'
 	import Footer from './pages/Footer.vue'
+	import HomeAd from './HomeAd.vue'
 	import BannerPhone from './BannerPhone.vue'
 	import HTTPUtil from '../js/HttpUtil.js'
 	import CookieUtil from '../js/CookieUtil.js'
+	import $ from 'jquery'
 
 	export default {
 		metaInfo: {
@@ -70,83 +66,47 @@
 		components: {
 			Header,
 			Footer,
-			BannerPhone
+			BannerPhone,
+			HomeAd
 		},
 		data() {
 			return {
 				bannerData: [],
 				categoryArray: [],
-				adData: [],
-				levelCellWidth:104,
-				levelCellNum:9,
+				adList: [],
+				site: "",
+				levelCellWidth: 104,
+				levelCellNum: 9,
 			}
 		},
-		methods: {
-			updateCellWidth:function() {//更新所有cell宽度
-			//从多少个开始适配
-							let array = this.getCellFineWidth(15)
-							let width = array[0]
-							let num = array[1]
-							
-							this.levelCellWidth = width
-							this.levelCellNum = num
-							
-							// console.log('每行个数:'+num+"cell宽度:"+width)		  
-						  },
-						  getCellFineWidth:function(num) {//获取cell最适合宽度
-						  
-						  				  let allwidth = $("#lgcontentUl").width()
-						  				  // console.log('总宽度:'+allwidth)
-						  				  let padding = 10//间距
-						  				  let cellW = (allwidth - padding * (num - 1))/num
-						  				  if (cellW >= 104) {
-						  					  return [cellW,num]
-						  				  }else {
-						  					  return this.getCellFineWidth(num - 1)
-						  				  }
-						  },
-						  getCellStyle:function(index) {
-							  // console.log("当前cell序号index:"+index);
-						  				  if (index % this.levelCellNum == 0) {//每行 第一个
-						  				    // console.log('这是第一个:index:'+index+'余数:'+(index % this.levelCellNum))
-						  					return {width:this.levelCellWidth+'px'}
-						  				  }else {
-						  					return {width:this.levelCellWidth+'px','margin-left':'10px'}
-						  				  }
-						  },
-						  getLeveProducts:function(items){//切掉不够显示一行的作品
-						  
-							//多了的作品数
-							 let remain = items.length % this.levelCellNum
-							  if (items.length > 2 && items.length > this.levelCellNum && remain <= this.levelCellNum / 2.0) {
-								  let tItems = [].concat(items)
-								  // let tItems = JSON.parse(JSON.stringify(items))
-								  var removeIndex =  items.length - remain
-								  //删除多余作品
-								  tItems.splice(removeIndex)
-								  return tItems
-							  }
-							  return items
-						  }
-		},
 		mounted() {
+			let allwidth = $("#vue_det").width()
+			// allwidth = this.$refs.lgcontentUlRef.$el.clientWidth;
+			console.log('llllllkkkkkk总宽度:'+allwidth)
+			
+			let that = this;
+			$(window).resize(function(){
+				console.log("jquery level监听到窗口变化");
+				that.updateCellWidth();
+			});
+			
+			
+			
 			HTTPUtil.get('home/getadAndBanner.do', null)
 				.then(response => {
-					console.log('bannerdata:'+ response.data);
+					console.log('bannerdata:' + response.data);
 					if (response.data.code == 0) {
 						let data = response.data.data;
-
+		
 						this.bannerData = data.banner.items;
-						this.adData = data.Ad.items;
-						// this.categoryArray = data.Category;
-						console.log('banner:' + this.bannerData.length);
-						console.log('categoryArray:' + JSON.stringify(this.bannerData));
+						this.adList = data.Ad.items;
+						this.updateCellWidth();
 					}
 				})
 				.catch(function(error) {
 					console.log(error);
 				});
-
+		
 			// 获取banner
 			HTTPUtil.get('home/getProducts.do', null)
 				.then(response => {
@@ -155,15 +115,82 @@
 					if (response.data.code == 0) {
 						let data = response.data.data;
 						this.categoryArray = data.Category;
-						// console.log('categoryArray:' + JSON.stringify(this.categoryArray));
+						
+						this.$nextTick(() => {//下次DOM更新执行
+							console.log("DOM 更新了,让父frame刷新高度+++++++");
+							this.updateCellWidth();
+						})
 					}
 				})
 				.catch(function(error) {
 					console.log(error);
 				});
-				
-				
+		},
+		methods: {
+			updateCellWidth: function() { //更新所有cell宽度
+				//从多少个开始适配
+				let array = this.getCellFineWidth(15)
+				if (array) {
+					let width = array[0]
+					let num = array[1]
+					
+					this.levelCellWidth = width
+					this.levelCellNum = num
+					
+					console.log('leve----每行个数:'+num+"cell宽度:"+width)	
+				}
+					  
+			},
+			getCellFineWidth: function(num) { //获取cell最适合宽度
+
+				let allwidth = $("#levelContainer").width()
+				// allwidth = this.$refs.lgcontentUlRef.$el.clientWidth;
+				console.log('总宽度:'+allwidth)
+				if (typeof(allwidth) == "undefined") {
+					console.log('组件总宽度未定义啊')
+					return;
+				}
+				if (allwidth > 0) {
+					let padding = 10 //间距
+					let cellW = (allwidth - padding * (num - 1)) / num
+					if (cellW >= 104) {
+						return [cellW, num]
+					} else {
+						return this.getCellFineWidth(num - 1)
+					}
+				}
+				return null
+			},
+			getCellStyle: function(index) {
+				// console.log("当前cell序号index:"+index);
+				if (index % this.levelCellNum == 0) { //每行 第一个
+					// console.log('这是第一个:index:'+index+'余数:'+(index % this.levelCellNum))
+					return {
+						width: this.levelCellWidth + 'px'
+					}
+				} else {
+					return {
+						width: this.levelCellWidth + 'px',
+						'margin-left': '10px'
+					}
+				}
+			},
+			getLeveProducts: function(items) { //切掉不够显示一行的作品
+
+				//多了的作品数
+				let remain = items.length % this.levelCellNum
+				if (items.length > 2 && items.length > this.levelCellNum && remain <= this.levelCellNum / 2.0) {
+					let tItems = [].concat(items)
+					// let tItems = JSON.parse(JSON.stringify(items))
+					var removeIndex = items.length - remain
+					//删除多余作品
+					tItems.splice(removeIndex)
+					return tItems
+				}
+				return items
+			}
 		}
+		
 	}
 </script>
 
