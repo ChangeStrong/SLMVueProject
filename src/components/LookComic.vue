@@ -216,10 +216,11 @@
 				}
 			},
 			addChpterRecoder: function() { //添加章节浏览记录
-			return;
+			
 				if (!UserInfoManager.isLogined()) {
 					return;
 				}
+				console.log('添加章节浏览记录：'+JSON.stringify(UserInfoManager.getInfo().userExt));
 				let sessionKey = UserInfoManager.getInfo().userExt.sessionKey
 				var params = new URLSearchParams();
 				params.append('productId', this.productId);

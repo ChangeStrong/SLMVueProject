@@ -71,7 +71,7 @@
 <script>
 	import Header from './pages/Header.vue'
 	import Footer from './pages/Footer.vue'
-	import HTTPUtil from '../js/HttpUtil.js'
+	import HttpUtil from '../js/HttpUtil.js'
 
 	export default {
 		data() {
@@ -113,7 +113,7 @@
 			let type = this.$route.query.type;
 			console.log('type:' + type);
 			let pageNumber = this.$route.query.pageNumber;
-			let searchKeyWord = this.$route.query.searchKeyWord;
+			let searchKeyWord = this.$route.query.keyword;
 
 			var params = new URLSearchParams();
 			if (pageNumber) {
@@ -139,11 +139,11 @@
 				params.append('type', '0');
 			}
 
-
-			HTTPUtil.post(url, params)
+			console.log('拿到数据：'+JSON.stringify(params));
+			HttpUtil.post(url, params)
 				.then(response => {
 
-					console.log(response.data);
+					console.log('拿到数据：'+JSON.stringify(response.data));
 
 					if (response.data.code == 0) {
 						let data = response.data.data;
