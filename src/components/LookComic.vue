@@ -58,6 +58,8 @@
 	import $ from 'jquery'
 	import HTTPUtil from '../js/HttpUtil.js'
 	import SLMUtil from '../js/SLMUtil.js'
+	import SLMCommUI from '../js/SLMCommUI.js'
+	import UserInfoManager from "../js/UserInfoManager.js"
 
 	export default {
 		metaInfo() {
@@ -107,60 +109,80 @@
 		},
 		mounted() {
 			let productId = this.$route.query.productId;
-			// let productId = getQueryVariable('productId');
 			this.productId = productId;
-			//获取本话所有图片
-			let charptId = this.$route.query.charptId;
-			// let charptId = getQueryVariable('charptId');
-			this.activeChapterId = charptId;
 
+			let charptId = this.$route.query.charptId;
+					this.activeChapterId = charptId;
+					
+					
+					//document.title = this.productName;			
+			
+					var pcInterval = 140
+					let windowWidth = document.documentElement.clientWidth;
+					let windowHeight = document.documentElement.clientHeight;
+					console.log("windowHeight高度"+windowHeight)
+					if (SLMCommUI.isMobile() && windowHeight >= 640) {
+						console.log("检测到是手机，更改底部高度")
+						pcInterval = 140+20
+						this.bottomBarHeight = 70
+					}
+					let content = document.getElementById("wdCatalogueList")
+					content.style.height = window.innerHeight - pcInterval + "px"
+					window.onresize = function() {
+						let windowHeight = document.documentElement.clientHeight;
+						console.log("windowHeight高度"+windowHeight)
+						let content = document.getElementById("wdCatalogueList")
+						content.style.height = window.innerHeight - pcInterval + "px"
+					}
+					console.log('*****监听滚动到底');
+					//监听滚动到底
+					window.addEventListener('scroll', this.handleScroll, true);
+					
+					this.addChpterRecoder()
+					this.requestChapterInfo()
+		},
+		methods: {
+			requestChapterInfo:function() {
 			var params = new URLSearchParams();
-			if (productId) {
-				params.append('productId', productId);
+			if (this.productId) {
+				params.append('productId', this.productId);
 			}
-			if (charptId) {
-				params.append('chapterId', charptId);
+			if (this.activeChapterId) {
+				params.append('chapterId', this.activeChapterId);
 			}
 			params.append('pageNumber', '1');
 			params.append('pageSize', '200');
 
-			console.log('请求参数：' + charptId + 'pid:' + productId)
+			let that = this
+			console.log('请求参数：' + this.activeChapterId + 'pid:' + this.productId)
 			HTTPUtil.post('product/getChapter.do', params)
 				.then(response => {
 					// console.log('图片s：' + JSON.stringify(response.data));
 
 					if (response.data.code == 0) {
 						let Chapt = response.data.data.Chapter;
+						console.log("打印java的章节信息");
+						console.log(Chapt);
 						let info = Chapt.episodeVos[0];
-
-						this.resources = info.resources;
-						if (this.resources.length > 0) {
-							this.curLoadIndex = 0;
-							this.pictures.push(this.resources[this.curLoadIndex]);
+						
+						that.resources = info.resources;
+						if (that.resources.length > 0) {
+							that.curLoadIndex = 0;
+							that.pictures.push(that.resources[that.curLoadIndex]);
 						}
-						this.nextChapterId = Chapt.nextChapterId;
-						this.upChapterId = Chapt.upChapterId;
-						this.chapterName = Chapt.name;
-						console.log('长度：' + this.pictures[0] + '\n');
-						this.productName = Chapt.productName;
-						document.title = this.productName;
+						that.nextChapterId = Chapt.nextChapterId;
+						that.upChapterId = Chapt.upChapterId;
+						that.chapterName = Chapt.name;
+						that.sortIndex = Chapt.sortIndex
+						console.log('长度：' + that.pictures[0] + '\n');
+						that.productName = Chapt.productName;
 					}
-				})
-				.catch(function(error) {
-					console.log(error);
-				});
-
-			let content = document.getElementById("wdCatalogueList")
-			content.style.height = window.innerHeight - 140 + "px"
-			window.onresize = function() {
-				let content = document.getElementById("wdCatalogueList")
-				content.style.height = window.innerHeight - 140 + "px"
-			}
-			console.log('*****监听滚动到底');
-			//监听滚动到底
-			window.addEventListener('scroll', this.handleScroll, true);
-		},
-		methods: {
+					})
+					.catch(function(error) {
+						that.isRequesting = false
+						console.log(error);
+					});
+			},
 			clickSpaceArea: function(event) {
 				this.isHiddenTopAndBottomNav = !this.isHiddenTopAndBottomNav;
 				console.log('点击space')
@@ -194,6 +216,7 @@
 				}
 			},
 			addChpterRecoder: function() { //添加章节浏览记录
+			return;
 				if (!UserInfoManager.isLogined()) {
 					return;
 				}
@@ -257,7 +280,7 @@
 				let that = this
 				HTTPUtil.post('product/chapter/list.do', params)
 					.then(response => {
-						console.log(JSON.stringify(response.data));
+						console.log("目录数据："+JSON.stringify(response.data));
 						that.isRequesting = false
 						if (response.data.code == 0) {
 							let data = response.data.data;
