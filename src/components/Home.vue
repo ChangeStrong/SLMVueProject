@@ -91,7 +91,6 @@
 			});
 			
 			
-			
 			HTTPUtil.get('home/getadAndBanner.do', null)
 				.then(response => {
 					console.log('bannerdata:' + response.data);

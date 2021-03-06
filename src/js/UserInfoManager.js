@@ -1,7 +1,8 @@
 import HttpUtil from "./HttpUtil.js"
 import CookieUtil from "./CookieUtil.js"
+import bridge from "./dsbridge.js"
 
-let isLoginTest = HttpUtil.isProduct == 1? 0:1 //0:为正常模式 1:为强制登录成功
+let isLoginTest = HttpUtil.isProduct == 1? 0:0 //0:为正常模式 1:为强制登录成功
 let saveUserKey = HttpUtil.isProduct == 1? "SLM_UserInfo":"SLM_UserInfo_local"
 
 // let testInfo = {"id":85,"sex":2,
@@ -16,6 +17,21 @@ let testInfo = {"id":127,"sex":1,"headUrl":"http://thirdqq.qlogo.cn/g?b=oidb&k=2
 "userExt":{"id":127,"openid":"BDE4CB794044DA5130996122070795E1","sessionKey":"localSessionKey320201001081914884","expirationTime":"2020-10-02 08:19:15:000","originType":3},"roleId":4,"description":"本人新作九重咒，大家多多支持哈"}
 
 let UserInfoManager = {
+	nativeRegister:function(){
+		//原生调用js方法
+		console.log("Native:注册原生方法")
+		dsBridge.register('nativeInvokeJs', function (jsonStr) {
+		        //js执行相关操作
+			console.log("收到:"+jsonStr);
+			let jsonObj = JSON.parse(jsonStr);
+			let cmd = parseInt(jsonObj.cmd);
+			if (cmd == 2){
+				//获取sessionkey成功
+				UserInfoManager.requestUserDetailInfo(jsonObj.token);
+			}
+		        return "this is js json string.";
+		    })
+	},
 	isSupportStorange:function() {
 		// 判断浏览器是否支持
 		if (typeof(Storage) !== "undefined") {
@@ -78,7 +94,32 @@ let UserInfoManager = {
 		storage.removeItem(saveUserKey);
 		CookieUtil.delete(saveUserKey);
 		console.log("已removeInfo:")
+	},
+	requestUserDetailInfo:function(token){
+		console.log("get navtive token:"+token)
+		var params = new URLSearchParams();
+		params.append('sessionKey', token);
+		let that = this;
+		HttpUtil.post('user/getDetail.do', params)
+			.then(response => {
+				console.log(response.data);
+				if (response.data.code == 0) {
+					//user
+					that.save(response.data.data.user)
+					VueBridge.$emit('loginSuccess','获取用户信息成功');
+				}
+			})
+			.catch(function(error) {
+				console.log(error);
+			});
+	},nativeRquestSessionkeyCmd001:function(){
+		let paramJson = {plartform:"js",pro_version:"0.1",cmd:"001",description:"js请求原生登录给到sessionkey"};
+		console.log("发送:"+paramJson);
+		dsBridge.call("jsInvokeNative", paramJson)
 	}
 }
+
+
+
 
 export default UserInfoManager

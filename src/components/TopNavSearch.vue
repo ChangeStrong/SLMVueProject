@@ -87,6 +87,15 @@
 			  console.log("判断用户是否登录");
 			  if(UserInfoManager.isLogined()) {
 				  this.loginSuccess();
+			  }else{
+				  UserInfoManager.nativeRegister();//监听原生
+				  setTimeout(() =>{
+					  if(UserInfoManager.isLogined()) {
+					  				return;
+					  }
+				      //请求获取原生的sessionkey
+				      UserInfoManager.nativeRquestSessionkeyCmd001();
+				  },1000);
 			  }
 		
 		    //获取焦点
