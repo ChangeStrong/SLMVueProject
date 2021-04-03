@@ -24,6 +24,7 @@ function httpApi (method, url, params) {
 	let rooturl = getBaseUrl()
   return new Promise((resolve, reject) => {
     axios({
+	  headers: {'platform': 'mobile_js'},
       method: method,
       url: url,
       data: method === 'POST' || method === 'PUT' ? params : null,
