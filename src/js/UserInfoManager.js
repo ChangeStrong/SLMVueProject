@@ -106,7 +106,9 @@ let UserInfoManager = {
 				if (response.data.code == 0) {
 					//user
 					that.save(response.data.data.user)
-					VueBridge.$emit('loginSuccess','获取用户信息成功');
+					// VueBridge.$emit('loginSuccess','获取用户信息成功');
+					console.log("获取到用户信息成功...");
+					that.refreshVueLoginUI();
 				}
 			})
 			.catch(function(error) {

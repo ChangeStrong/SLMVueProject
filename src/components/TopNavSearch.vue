@@ -56,16 +56,19 @@
 	import SLMCommUI from "../js/SLMCommUI.js"
 	
 	var isEnterResult = false;
-	export default {
-		  data () {
-		    return {
+	
+	var tempVueData = {
 				isLogined:false,
 				searchResults: [],
-				searchKeyWord: this.$route.query.keyword ? this.$route.query.keyword:"",
+				// searchKeyWord: this.$route.query.keyword ? this.$route.query.keyword:"",
 				isblur: 1,
 				headImgUrl:"../resources/images/defaultAdminHead.png",
 				isShowHeadListView:false,
-		    }
+		    };
+	var tempVue = {
+		  data () {
+			 tempVueData.searchKeyWord = this.$route.query.keyword ? this.$route.query.keyword:"";
+		    return tempVueData;
 		  },
 		  watch: {
 					'searchKeyWord': function(newvalue) {
@@ -88,14 +91,17 @@
 			  if(UserInfoManager.isLogined()) {
 				  this.loginSuccess();
 			  }else{
+				  //未登录
 				  UserInfoManager.nativeRegister();//监听原生
-				  setTimeout(() =>{
+				 /* this.$nextTick(() => {
 					  if(UserInfoManager.isLogined()) {
-					  				return;
+					  		return;
 					  }
-				      //请求获取原生的sessionkey
-				      UserInfoManager.nativeRquestSessionkeyCmd001();
-				  },1000);
+					  //请求获取原生的sessionkey
+					  UserInfoManager.nativeRquestSessionkeyCmd001();
+				  })*/
+				  // setTimeout(() =>{
+				  // },1000);
 			  }
 		
 		    //获取焦点
@@ -229,6 +235,33 @@
 			}
 		}
 	}
+	
+	export default tempVue;
+	
+	//UserInfoManager.prototype.refreshVueLoginUI
+	UserInfoManager.refreshVueLoginUI = function(){
+		//已经获取到用户信息了刷新UI
+		console.log("refreshVueLoginUI");
+		// tempVue.loginSuccess();
+		tempVueData.isLogined = UserInfoManager.isLogined();
+		$("#loginWrapAlert").css({"display":"none"})
+		tempVueData.headImgUrl = UserInfoManager.getInfo().headUrl;
+	};
+	
+	//监听js加载完成
+	window.onload = function(){
+		if(UserInfoManager.isLogined()) {
+			console.log("已登录..");
+				return;
+		}
+		// setTimeout(()=>{
+			//请求获取原生的sessionkey
+			console.log("请求获取原生的sessionkey");
+			UserInfoManager.nativeRquestSessionkeyCmd001();
+		// },10000)
+		
+	}
+	
 </script>
 
 <style scoped>
